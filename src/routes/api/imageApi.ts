@@ -1,6 +1,6 @@
 import express from 'express';
 import fs from 'fs';
-import sharp from 'sharp';
+import imageProcess from '../utilities/utilities';
 
 const imageApi = express.Router();
 
@@ -31,18 +31,17 @@ imageApi.get('/', (req, res) => {
       // check file exist or not
     } else if (fs.existsSync(`./assets/full/${fileName}.jpg`)) {
       // resize image suing sharp
-      sharp(`./assets/full/${fileName}.jpg`)
-        .resize(parseInt(x), parseInt(y))
-        .toFile(`./assets/thump/${fileName}-${x}_${y}.jpg`, function (err) {
-          // if err happen when resizing
-          if (err) {
-            res.send('Something went wrong : ' + err);
-          }
-          const src = fs.createReadStream(
-            `./assets/thump/${fileName}-${x}_${y}.jpg`
-          );
-          src.pipe(res);
-        });
+      imageProcess(fileName, x, y);
+
+      // in order to get the file after resizing it
+      setTimeout(() => {
+        const src = fs.createReadStream(
+          `./assets/thump/${fileName}-${x}_${y}.jpg`
+        );
+
+        src.pipe(res);
+      }, 1000);
+
       // if filename is wrong
     } else {
       res.status(400);
